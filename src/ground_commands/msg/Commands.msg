@@ -1,0 +1,15 @@
+float64 X
+float64 Y
+float64 Z
+float64 X_Dot
+float64 Y_Dot
+float64 Z_Dot
+float64 Psi
+float64 Theta
+float64 Phi
+float64 Psi_Dot
+float64 Theta_Dot
+float64 Phi_Dot
+float64 Mag_X
+float64 Mag_Y
+float64 Mag_Z
