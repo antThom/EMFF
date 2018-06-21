@@ -17,6 +17,9 @@
  #include <geometry_msgs/Vector3.h>  
  #include <std_msgs/Float32.h>
  #include <sensor_msgs/Imu.h>
+ #include <LIS3MDL.h>
+ #include <LSM6.h>
+ #include <Wire.h>
  #include "constants.h"
  
 ///////////////////////{ GLOBALS }////////////////////////////////////////
@@ -24,7 +27,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 
-//Callback Functions for commands coming from the groundStation
+//Callback Functions for COMMANDS coming from the groundStation
 
  void velocityCallback( const geometry_msgs::Twist& velocityCommand)
  {
@@ -73,20 +76,47 @@ void setup() {
   nh.advertise(current_applied);
   nh.advertise(imu);
 
+  Wire.begin(); //Initialize I2C
+
+  // Make sure the sensors get initialized 
+  if (!acc_gyr.init())
+  {
+    //Turn on imu_LED
+  }
+  acc_gyr.enableDefault();
+  
+  if (!mag.init())
+  {
+    //Turn on mag_LED
+  }
+  mag.enableDefault();
+  
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
-  ///////////////////////{ SAMPLE CODE, NEEDS TO BE DELETED } //////////////////////////////
+  mag.read();         //get data from the magnetometer
+  acc_gyr.read();     //get data from the accelerometer and gyro
+
+  magnetApplied.x=mag.m.x; magnetApplied.y=mag.m.y; magnetApplied.z=mag.m.z;
+  IMU.linear_acceleration.x=acc_gyr.a.x; IMU.linear_acceleration.y=acc_gyr.a.y; IMU.linear_acceleration.z=acc_gyr.a.z;  
+  IMU.angular_velocity.x=acc_gyr.g.x; IMU.angular_velocity.y=acc_gyr.g.x; IMU.angular_velocity.z=acc_gyr.g.x;
+  
+  IMU.header.frame_id = "IMU"; // Give the Sensor an ID
+  IMU.header.stamp = nh.now(); // This is NEEDED TO GET A TIME STEP
+  
+  ///////////////////////{ Get the euler angle from the IMU and convert to quaterion }////////////////////////
+  
+  /*//////////////////////{ SAMPLE CODE, NEEDS TO BE DELETED } //////////////////////////////
   current.data = 1.0;
   magnetApplied.x=1.0; magnetApplied.y=2.0; magnetApplied.z=3.0;
-  IMU.header.frame_id = "IMU"; 
-  IMU.header.stamp = nh.now(); // This is NEEDED TO GET A TIME STEP
   IMU.orientation.x=1.0; IMU.orientation.y=1.0; IMU.orientation.z=1.0; IMU.orientation.w=1.0;
   IMU.angular_velocity.x=0.0; IMU.angular_velocity.y=0.0; IMU.angular_velocity.z=0.0;
   IMU.linear_acceleration.x=4.0; IMU.linear_acceleration.y=4.0; IMU.linear_acceleration.z=4.0;
-  //////////////////////////////////////////////////////////////////////////////////////////
+  *//////////////////////////////////////////////////////////////////////////////////////////
+
+  
   
   magnet_applied.publish( &magnetApplied );
   current_applied.publish( &current );
