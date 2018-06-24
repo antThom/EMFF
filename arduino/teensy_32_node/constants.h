@@ -11,7 +11,8 @@
     //const int SENSOR_SIGN[9] = {1,1,1,-1,-1,-1,1,1,1}; //Correct directions x,y,z - gyro, accelerometer, magnetometer
     
     //Pin Assignment
-    const int curSens = 1;        //Analog pin 1
+    const int curSens1 = 1;        //Analog pin 1
+    const int curSens2 = 2;        //Analog pin 2
     const int imu_LED = 12;       //Digital pin 12
     const int mag_LED = 11;       //Digital pin 11
 
@@ -23,14 +24,13 @@
     //H-Bridge structures
     struct Coil 
     {
-      const int num[2];
       const char ID[4];
-      const int pin[8];
+      const int pin[4];
       int state[4];
-    };
-    //             Num        ID                PIN #          STATES
-    Coil coil_1 = { {1} , {'a','b','c','d'} , {23,22,21,20} , {0,0,0,0} };
-    Coil coil_2 = { {2} , {'a','b','c','d'} , {3,4,5,6} , {0,0,0,0} };
+    }; 
+    //                   ID                PIN #          STATES
+    Coil coil_1 = { {'a','b','c','d'} , {23,22,21,20} , {0,0,0,0} };
+    Coil coil_2 = { {'a','b','c','d'} , {3,4,5,6} , {0,0,0,0} };
     
 
     /*
