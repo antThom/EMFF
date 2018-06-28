@@ -20,6 +20,7 @@
  #include <LIS3MDL.h>
  #include <LSM6.h>
  #include <Wire.h>
+ #include <math.h>
  
  #include "constants.h"
 
@@ -32,21 +33,33 @@
      digitalWrite(13, HIGH-digitalRead(13));  //Blink on board LED when a message is recieved 
  }
 */
-/*
+
  void positionCallback( const geometry_msgs::Pose& positionCommand)
  {
-   // When we get a position and orientation command, we will use it as a reference and 
-    * activate teh magnet controller. The magnet Controller will then control the vehicles
-    * magnetic field and move the vehicle to the new position and orientataion. 
-    * 
-    * The POSITION AND ORIENTATION commands are relative to other vehicles. The other vehicle's
-    * position and orientation is selected in MATLAB and the analysis is also done in MATLAB.
-    * 
-    * The postion data just gets saved into a ros data bag
-   //
-     digitalWrite(13, HIGH-digitalRead(13));  //Blink on board LED when a message is recieved 
+   /* The incoming position command will be sent from MOCAP and should only be used as an 
+    * initial condition for intergration. For now I think we are mostly concerned with the
+    * attitude and attitude rates
+    *  1. Get orientation data
+    *  2. Convert to euler angles
+    *  3. Save the first set of data and save it as an Initial Condition
+    *  4. Ignore the rest of incoming data
+    */
+
+    if (dataSet==1)
+    {
+      float x = positionCommand.orientation.x;
+      float y = positionCommand.orientation.y;
+      float z = positionCommand.orientation.z;
+      float w = positionCommand.orientation.w;
+
+      //Convert Quaternion to euler angles and these will be the initail conditions
+      yaw = atan2(2*(x*y+w*z),(w*w-z*z-y*y+x*x)); // This is the most important one because our system shuldn't be changing it pitch or roll at all 
+      pitch = asin(-2*(x*z-y*w));
+      roll = atan2(2*(z*y+x*w),(w*w+z*z-y*y-x*x));
+      dataSet++;
+    }
  }
-*/
+
 
  void magnetCallback( const geometry_msgs::Vector3& magnetCommand)
  {
@@ -69,7 +82,7 @@
      // Saturation and rounding... The output should be either a 1 or 0 {mag_Z is ignored for all 2D functions}
      float mag_X=round(saturation(magnetCommand.x));
      float mag_Y=round(saturation(magnetCommand.y));
-     float mag_Z=round(saturation(magnetCommand.z));
+     // float mag_Z=round(saturation(magnetCommand.z));
 
      // Turn off all of the MOSFETS
      STOP_COIL_Current(0); //Floating
@@ -104,7 +117,7 @@
 
 ///////////////////////{ SUBSCRIBE }////////////////////////////////////////
 // Initialized the Subscriber (must know the msg type and the topic that it is subscribing to
- //  ros::Subscriber<geometry_msgs::Pose> pos("POSITION", &positionCallback ); //Topic == POSITION && Node == pos
+ ros::Subscriber<geometry_msgs::Pose> pos("POSITION", &positionCallback ); //Topic == POSITION && Node == pos
  //  ros::Subscriber<geometry_msgs::Twist> velocity("VELOCITY", &velocityCallback ); //Topic == VELOCITY && Node == velocity
  ros::Subscriber<geometry_msgs::Vector3> magnet("MAGNET", &magnetCallback );  //Topic == MAGNET && Node == magnet
 ///////////////////////////////////////////////////////////////////////////
@@ -127,8 +140,13 @@ ros::Publisher imu("IMU", &IMU);
 void setup() {
   // put your setup code here, to run once:
   pinMode(13,OUTPUT); //This the onboard LED
+  pinMode(LED,OUTPUT);
+  pinMode(imu_LED,OUTPUT);
+  pinMode(mag_LED,OUTPUT);
+  
+  digitalWrite(13,HIGH); //Turn on initialization LED
   nh.initNode();
-  //  nh.subscribe(pos);
+  nh.subscribe(pos);
   //  nh.subscribe(velocity);
   nh.subscribe(magnet);
 
@@ -147,7 +165,8 @@ void setup() {
     while(1);
   }
   acc_gyr.enableDefault();
-  //acc_gyr.writeReg(LSM6::CTRL1_XL, 0x3C); // 52 Hz, 8 g full scale
+  acc_gyr.writeReg(LSM6::CTRL1_XL, 0x3C); // 52 Hz, 8 g full scale
+  acc_gyr.writeReg(LSM6::CTRL2_G, 0x4C); // 104 Hz, 2000 dps full scale
   
   if (!mag.init())
   {
@@ -156,7 +175,10 @@ void setup() {
     while(1);
   }
   mag.enableDefault();
-  
+  delay(1000);
+  analogWrite(LED,127);//Turn on good status LED
+  digitalWrite(13,LOW); //Turn off initialization LED
+  time_0=millis(); //Initial Time
 }
 
 void loop() {
@@ -164,31 +186,41 @@ void loop() {
   
   //Read IMU Data
   mag.read();         //get data from the magnetometer
-  acc_gyr.read();     //get data from the accelerometer and gyro
-
+  acc_gyr.readAcc();  //get data from the accelerometer
+  
+  acc_gyr.readGyro();     //get data from the accelerometer and gyro
+  time_1=millis();    //time of sensor reading
+  dt=time_1-time_0;   //Time difference
+  time_0=time_1;      //Set new initial time for next integration
+  
   //Assign values to the magnet
-  magnetApplied.x=mag.m.x; 
-  magnetApplied.y=mag.m.y; 
-  magnetApplied.z=mag.m.z;
+  magnetApplied.x=mag.m.x / magGain; 
+  magnetApplied.y=mag.m.y / magGain; 
+  magnetApplied.z=mag.m.z / magGain;
+
+
+  IMU.header.frame_id = "IMU"; // Give the Sensor an ID
+  IMU.header.stamp = nh.now(); // This is NEEDED TO GET A TIME STEP
 
   //Assign values to the accelerometer
-  IMU.linear_acceleration.x=acc_gyr.a.x; 
-  IMU.linear_acceleration.y=acc_gyr.a.y; 
-  IMU.linear_acceleration.z=acc_gyr.a.z;  
+  IMU.linear_acceleration.x=acc_gyr.a.x * accGain/GRAVITY*gravity; 
+  IMU.linear_acceleration.y=acc_gyr.a.y * accGain/GRAVITY*gravity; 
+  IMU.linear_acceleration.z=acc_gyr.a.z * accGain/GRAVITY*gravity;  
 
   //Assign values to the gyro
-  IMU.angular_velocity.x=acc_gyr.g.x; 
-  IMU.angular_velocity.y=acc_gyr.g.x; 
-  IMU.angular_velocity.z=acc_gyr.g.x;
+  IMU.angular_velocity.x=acc_gyr.g.x / gyroGain; 
+  IMU.angular_velocity.y=acc_gyr.g.y / gyroGain; 
+  IMU.angular_velocity.z=acc_gyr.g.z / gyroGain;
 
   //Assign values to the orientation
+  float yawRate=acc_gyr.g.z;
+  yaw=integrator(yawRate);  //Not being published as of yet
+  
   IMU.orientation.x=0.0; //We're getting data from MOCAP so I ignored these values
   IMU.orientation.y=0.0; 
   IMU.orientation.z=0.0; 
   IMU.orientation.w=0.0;
   
-  IMU.header.frame_id = "IMU"; // Give the Sensor an ID
-  IMU.header.stamp = nh.now(); // This is NEEDED TO GET A TIME STEP
 
   //Assign values to the Current Sensor
   current1.data = currentSensor(analogRead(curSens1));
@@ -222,7 +254,9 @@ void loop() {
 
 float currentSensor(float CS_Vout)
 {
-  float c = 73.3*(CS_Vout/VCC_Reg)-36.7;
+  CS_Vout = map(CS_Vout,0,1023,0,3.3);
+  float c = (CS_Vout-0.5*VCC_Teensy)/(0.185);
+  //float c = 73.3*(CS_Vout/VCC_Teensy)-36.7;
   return c;
 }
 
@@ -310,5 +344,11 @@ void pinState()
   coil_2.state[1] = digitalRead(coil_2.pin[1]);
   coil_2.state[2] = digitalRead(coil_2.pin[2]);
   coil_2.state[3] = digitalRead(coil_2.pin[3]);
+}
+
+float integrator(float yawRate)
+{
+  yaw = yaw + yawRate*dt;
+  return yaw;
 }
 
