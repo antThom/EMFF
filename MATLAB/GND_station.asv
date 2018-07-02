@@ -146,7 +146,6 @@ while tnow < tend
     
     % In this section I need to publish the data in x_mocap and in
     % attitude_observer
-    msgsAssign(x_observer(tt,:), attitude_observer(tt,:), lin_pos_msg, lin_vel_msg, ang_pos_msg, ang_vel_msg, lin_pos_pub, lin_vel_pub, ang_pos_pub, ang_vel_pub);
     
     tt= tt+1;
     
