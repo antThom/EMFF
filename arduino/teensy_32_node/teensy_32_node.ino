@@ -58,6 +58,7 @@
       roll = atan2(2*(z*y+x*w),(w*w+z*z-y*y-x*x));
       dataSet++;
     }
+    digitalWrite(LED, HIGH-digitalRead(LED));   // blink the led
  }
 
 
