@@ -11,13 +11,23 @@
     const float GRAVITY = 256.0;  //BYTES
     const float gyroGain = 70;    //mdps/LSB from dataSheet
     const float magGain = 6842.0; //LSB/gauss
+    const float pi = 3.141592654; //pi
+    float ohm = 0.5;              //resistance
+    float Vbat = 11.1;            //Voltage of the Battery
+    float N = 25.0;               //# of loops
+    float R = 0.3;                //Radius of coil meters
+    float A = pi*R*R;             //Area of coil meters^2
     
     //Pin Assignment
-    const int curSens1 = 0;        //Analog pin 1
-    const int curSens2 = 1;        //Analog pin 2
+    const int curSens1 = 0;        //Analog pin 0
+    const int curSens2 = 1;        //Analog pin 1
     const int imu_LED = 12;        //Digital pin 12
     const int mag_LED = 11;        //Digital pin 11
-    const int LED =10;             //Good status LED Digital pin 10
+    const int LED = 10;            //Good status LED Digital pin 10
+    const int coil_1_dir = 7;      //Direction of coil_1
+    const int coil_2_dir = 8;      //Direction of coil_2
+    const int coil_1_pwm = 23;     //DutyCycle of coil_1
+    const int coil_2_pwm = 22;     //DutyCycle of coil_2
 
     //System Variables
     float CS_Vout;
@@ -25,21 +35,11 @@
     float yaw;
     float pitch;
     float roll;
+    float DC_x;
+    float DC_y;
     float time_0, time_1, dt;
     LIS3MDL mag;
     LSM6 acc_gyr;
 
-    //H-Bridge structures
-    struct Coil 
-    {
-      const char ID[4];
-      const int pin[4];
-      int state[4];
-    }; 
-    //                   ID                PIN #          STATES
-    Coil coil_1 = { {'a','b','c','d'} , {23,22,21,20} , {0,0,0,0} };
-    Coil coil_2 = { {'a','b','c','d'} , {3,4,5,6} , {0,0,0,0} };
-
-    
     
 #endif

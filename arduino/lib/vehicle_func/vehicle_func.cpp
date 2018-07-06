@@ -10,7 +10,7 @@
 #include <LSM6.h>
 #include <Wire.h>
 
-void STOP_COIL_Current(int coilNum)
+void STOP_COIL_CUR(int coilNum)
 { 
   if(coilNum==1){
     digitalWrite(coil_1.pin[0],HIGH); 

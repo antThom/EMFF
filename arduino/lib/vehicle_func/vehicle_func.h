@@ -15,5 +15,5 @@
 	This header file contains the functions needed for the coils and H-Bridges
 */
 
-void STOP_COIL_Current(int coilNum) //Stop the current in the coil according to the coilNum sent from the user
+void STOP_COIL_CUR(int coilNum) //Stop the current in the coil according to the coilNum sent from the user
 #endif /* VEHICLE_FUNC_H */

@@ -64,56 +64,53 @@
 
  void magnetCallback( const geometry_msgs::Vector3& magnetCommand)
  {
-    /* When we get magnet commands we shoud compare them to our current magnet status and 
-     * determine whether or not we are going to:
-     *  1. Shut off Current
-     *  2. Reverse Current 
-     *  3. Forward Current
-     * Note that since we are always applying the max amounts of amps, we only have these 3 options
+    /* When we get magnet commands we need to convert that to a PWM dutycyle and calculate the magnetic
+     * dipole moment (mu) and magnetic field (B).To do the conversions and calculation we need to first 
+     * state some system parameters.
+     *  A = Area of Coil
+     *  N = Number of loops in the coil
+     *  L = Length of Coil (2*pi*R)
+     *  R = Radius of the Coil
+     *  Vbat = Voltage of the battery
+     *  ohm = Resistance of the coil
      * 
      * Operation Sequence
-     *  1. Get command, apply saturation, round to the nearest whole number
-     *  2. Open all of the MOSFETS (Only here for safety)
-     *  3. Apply the current to the coils
-     *  4. Save data in ros bag
-     *  
-     *  Note: MOSFETS a & c , b & d CANNOT be closed at the same time {BAD!!!!!!!!!!!!!!!}
+     *  1. Get command, apply saturation, and determine direction
+     *  2. Convert command into a dutycycle
+     *  3. Calculate mu and B
+     *  4. Send dutycycle and direction to the H-Bridge controller.
      */
+
+     float Imax = 20;   //amps  
+     float maxMag = N*Imax*A;
      
-     // Saturation and rounding... The output should be either a 1 or 0 {mag_Z is ignored for all 2D functions}
-     float mag_X=round(saturation(magnetCommand.x));
-     float mag_Y=round(saturation(magnetCommand.y));
+     // Saturation {mag_Z is ignored for all 2D functions}
+     float mag_X=(saturation(magnetCommand.x, maxMag));
+     float mag_Y=(saturation(magnetCommand.y, maxMag));
      // float mag_Z=round(saturation(magnetCommand.z));
 
-     // Turn off all of the MOSFETS
-     STOP_COIL_Current(0); //Floating
-     delay(5);
-     // Operate the H-Bridge
+     // Assign the direction of the current
+     if (mag_X < 0)
+        digitalWrite(coil_1_dir,LOW); 
+     else
+        digitalWrite(coil_1_dir,HIGH);
 
-     // COIL #1
-     if (mag_X==1){ 
-        FWD_COIL_Current(1);
-     }
-     else if (mag_X==-1){ 
-        RWD_COIL_Current(1);
-     }
-     else if (mag_X==0){  
-        STOP_COIL_Current(1);
-     }
+     if (mag_Y < 0)
+        digitalWrite(coil_2_dir,LOW); 
+     else
+        digitalWrite(coil_2_dir,HIGH);
+
+     //Convert the command into a dutycyle
+     DC_x = (mag_X*ohm)/(Vbat*A*N); //Domain = [0,1]
+     DC_y = (mag_Y*ohm)/(Vbat*A*N); //Domain = [0,1]
+
+     DC_x = map(DC_x,0,1,0,255); //new Domain = [0,255] for pwm
+     DC_y = map(DC_y,0,1,0,255);
+
+     //Apply the DutyCyle to the H-Bridge Controller
+     analogWrite(coil_1_pwm,DC_x);
+     analogWrite(coil_2_pwm,DC_y);
      
-     // COIL #2
-     if (mag_Y==1){  
-        FWD_COIL_Current(2);
-     }
-     else if (mag_Y==-1){  
-        RWD_COIL_Current(2);
-     }
-     else if (mag_Y==0){  
-        STOP_COIL_Current(2);
-     }
-     
-     // Read pin States
-     pinState();
  }
 
 ///////////////////////{ SUBSCRIBE }////////////////////////////////////////
@@ -226,7 +223,11 @@ void loop() {
   //Assign values to the Current Sensor
   current1.data = currentSensor(analogRead(curSens1));
   current2.data = currentSensor(analogRead(curSens2));
- 
+  
+  // Once we have the current we can calculate the dipole moment (mu) and the Magnetic Field (B)
+  float mu_x = current1.data*N*A; 
+  float mu_y = current2.data*N*A; 
+
   
   /*//////////////////////{ SAMPLE CODE, NEEDS TO BE DELETED } //////////////////////////////
   current.data = 1.0;
@@ -261,90 +262,16 @@ float currentSensor(float CS_Vout)
   return c;
 }
 
-void FWD_COIL_Current(int coilNum)
-  { 
-  if(coilNum==1){
-    digitalWrite(coil_1.pin[0],LOW);
-    digitalWrite(coil_1.pin[1],HIGH);
-    digitalWrite(coil_1.pin[2],LOW);
-    digitalWrite(coil_1.pin[3],HIGH);
-  }
-  else if(coilNum==2){
-    digitalWrite(coil_2.pin[0],LOW);
-    digitalWrite(coil_2.pin[1],HIGH);
-    digitalWrite(coil_2.pin[2],LOW);
-    digitalWrite(coil_2.pin[3],HIGH);
-  }
-}
-
-void RWD_COIL_Current(int coilNum)
-{
-  if(coilNum==1){
-    digitalWrite(coil_1.pin[0],HIGH);
-    digitalWrite(coil_1.pin[1],LOW);
-    digitalWrite(coil_1.pin[2],HIGH);
-    digitalWrite(coil_1.pin[3],LOW);
-  }
-  else if(coilNum==2){
-    digitalWrite(coil_2.pin[0],HIGH);
-    digitalWrite(coil_2.pin[1],LOW);
-    digitalWrite(coil_2.pin[2],HIGH);
-    digitalWrite(coil_2.pin[3],LOW);
-  }
-}
-
-void STOP_COIL_Current(int coilNum)
-{ 
-  // Open all the MOSFETS
-  if(coilNum==1){
-    digitalWrite(coil_1.pin[0],HIGH); 
-    digitalWrite(coil_1.pin[1],HIGH);
-    digitalWrite(coil_1.pin[2],LOW);
-    digitalWrite(coil_1.pin[3],LOW); 
-  }
-  else if(coilNum==2){
-    digitalWrite(coil_2.pin[0],HIGH); 
-    digitalWrite(coil_2.pin[1],HIGH);
-    digitalWrite(coil_2.pin[2],LOW);
-    digitalWrite(coil_2.pin[3],LOW);
-  }
-  else {
-    digitalWrite(coil_1.pin[0],HIGH); 
-    digitalWrite(coil_1.pin[1],HIGH);
-    digitalWrite(coil_1.pin[2],LOW);
-    digitalWrite(coil_1.pin[3],LOW);
-    
-    digitalWrite(coil_2.pin[0],HIGH); 
-    digitalWrite(coil_2.pin[1],HIGH);
-    digitalWrite(coil_2.pin[2],LOW);
-    digitalWrite(coil_2.pin[3],LOW);
-  }
-}
-
-float saturation(float mag) 
+float saturation(float mag, float maxMag) 
 {
   //Apply a saturation to the desired magnet direction
-  if (mag>1){
-    mag=1;
+  if (mag>maxMag){
+    mag=maxMag;
   }
-  else if (mag<-1){
-    mag=-1;
+  else if (mag<-maxMag){
+    mag=-maxMag;
   }
   return mag;
-}
-
-void pinState()
-{
-  //Read all of the states for the H-Bridge pins
-  coil_1.state[0] = digitalRead(coil_1.pin[0]);
-  coil_1.state[1] = digitalRead(coil_1.pin[1]);
-  coil_1.state[2] = digitalRead(coil_1.pin[2]);
-  coil_1.state[3] = digitalRead(coil_1.pin[3]);
-
-  coil_2.state[0] = digitalRead(coil_2.pin[0]);
-  coil_2.state[1] = digitalRead(coil_2.pin[1]);
-  coil_2.state[2] = digitalRead(coil_2.pin[2]);
-  coil_2.state[3] = digitalRead(coil_2.pin[3]);
 }
 
 float integrator(float yawRate)
@@ -352,4 +279,5 @@ float integrator(float yawRate)
   yaw = yaw + yawRate*dt;
   return yaw;
 }
+
 
