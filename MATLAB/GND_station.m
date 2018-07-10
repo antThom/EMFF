@@ -108,7 +108,7 @@ ind_var= ind_var(:);
 acc(1:Np,1) = {NaN*zeros(L,3)}; % Accelerometer data for each vehicle by row
 gyro(1:Np,1) = {NaN*zeros(L,3)}; % Gyro data for each vehicle by row
 magnet(1:Np,1) = {NaN*zeros(L,3)}; % Magnetometer for each vehicle by row
-time_IMU(1:Np,1) = {NAN*zeros(L,1)}; % Time from the IMU from each vehicle
+%time_IMU(1:Np,1) = {NaN*zeros(L,1)}; % Time from the IMU from each vehicle
 current(1:Np,1:2) = {NaN*zeros(L,1)}; % Current data for each vehicle by row and coil by column
 
 %% EVERYTHING ABOVE THIS POINT IS SETUP
@@ -190,7 +190,7 @@ while tnow < tend
         magnet{Np}(tt,2)=magApplied{Np}.LatestMessage.Y;
         magnet{Np}(tt,3)=magApplied{Np}.LatestMessage.Z;
         
-        time_IMU{Np}(tt)=imu{Np}.LatestMessage.Header.Stamp.Sec;
+        %time_IMU{Np}(tt)=imu{Np}.LatestMessage.Header.Stamp.Nsec;
         
         current{Np,1}(tt)=currApplied{Np}.LatestMessage.Data;
         current{Np,2}(tt)=currApplied{Np}.LatestMessage.Data;
@@ -222,7 +222,7 @@ for i=1:Np
     gyro{Np} = gyro{Np}(1:inde,:);
     magnet{Np} = magnet{Np}(1:inde,:);
     current{Np} = current{Np}(1:inde,:);
-    time_IMU{Np} = time_IMU(1:inde,:);
+    %time_IMU{Np} = time_IMU{Np}(1:inde);
 end
 %%  
 
