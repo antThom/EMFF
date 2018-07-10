@@ -10,16 +10,11 @@ clear all; close all; clc;
 
 %% Setup Ros Connections
 rosshutdown; %Shutdown any Ros connection before initializing a new one
-rosinit('192.168.1.24','NodeHost','192.168.1.22') %Initialize a new rosnode
+setenv('ROS_MASTER_URI','http://192.168.1.29:11311'); % set the ros master to a specific URI
+setenv('ROS_IP','192.168.1.22'); % set the ros ip address for this computer
+rosinit %Initialize a new rosnode
+% rosinit('192.168.1.24','NodeHost','192.168.1.22') %Initialize a new rosnode
 pause(2);   %Give matlab some time to setup the node
-
-%% Setup Publishers
-[lin_pos_pub,lin_pos_msg] = rospublisher('LIN_POSITION_NOW','geometry_msgs/Vector3');
-[lin_vel_pub,lin_vel_msg] = rospublisher('LIN_VELOCITY_NOW','geometry_msgs/Vector3');
-
-[ang_pos_pub,ang_pos_msg] = rospublisher('ANG_POSITION_NOW','geometry_msgs/Vector3');
-[ang_vel_pub,ang_vel_msg] = rospublisher('ANG_POSITION_NOW','geometry_msgs/Vector3');
-
 
 %% User defined Parameters
 prompt='Number of vehicles to track? ';
@@ -27,7 +22,44 @@ Np=input(prompt); % # of vehicles that we are tracking at one time
 
 % Vehicle ID specified in Motive
 vIDs = 1:Np;
+%% Setup Publishers
 
+% We will be sending magnet dipole commands for the ground station to each
+% vehicle. This means that we must have the same number of magnet commands
+% as we do vehicles. In the cell created below each row corresponds to a
+% vehicle
+
+magCmd=cell(Np,2);
+for i=1:Np
+    [magCmd{i,1}, magCmd{i,2}]=rospublisher('/MAGNET','geometry_msgs/Vector3');
+end
+
+% We are not sending any position or velocity data to the vehicles
+%[lin_pos_pub,lin_pos_msg] = rospublisher('LIN_POSITION_NOW','geometry_msgs/Vector3');
+%[lin_vel_pub,lin_vel_msg] = rospublisher('LIN_VELOCITY_NOW','geometry_msgs/Vector3');
+%[ang_pos_pub,ang_pos_msg] = rospublisher('ANG_POSITION_NOW','geometry_msgs/Vector3');
+%[ang_vel_pub,ang_vel_msg] = rospublisher('ANG_POSITION_NOW','geometry_msgs/Vector3');
+
+%% Setup Subscribers
+% Each vehicle will send this ground station its respective sensor data. So
+% we need to create a set of subscribers for each vehicle. I will use a
+% cell to do this. Each row in the cell corresponds to a vehicle.
+
+magApplied=cell(Np,1); % This is for the magnetometer data coming from the vehicle (Each row contains [x,y,z])
+currApplied=cell(Np,2); % This is for the current sensor data applied to the vehicle's coils (2 per vehicle)
+imu=cell(Np,1); % This is for vehicle IMU data.
+
+% Initialize all the Subscribers
+for i=1:Np
+   magApplied{i,1}=rossubscriber('/MAGNET_APPLIED','geometry_msgs/Vector3');
+   receive(magApplied{i,1},10); % Recieve a msg on this topic to ensure it is connected to the network (WAITS FOR 10 SECONDS TO RECIEVE)
+   currApplied{i,1}=rossubscriber('/CURRENT_APPLIED_1','std_msgs/Float32');
+   currApplied{i,2}=rossubscriber('/CURRENT_APPLIED_2','std_msgs/Float32');
+   receive(currApplied{i,1},10);
+   receive(currApplied{i,2},10);
+   imu{i,1}=rossubscriber('/IMU','sensor_msgs/Imu');
+   receive(imu{i,1},10); 
+end
 %%  Initialize: Motion Capture Interface
 % Add NatNet library and java jar files
 usr1= getenv('USERNAME');
@@ -71,6 +103,14 @@ ind_var = repmat(6*[0:Np-1],3,1)+repmat([1;2;3],1,Np);
 % This is used to extract the positions or angles but not the rates from
 % the state vector; e.g., ind_var = [1,2,3,7,8,9,..];
 ind_var= ind_var(:);
+
+% Data coming from the Vehicles
+acc(1:Np,1) = {NaN*zeros(L,3)}; % Accelerometer data for each vehicle by row
+gyro(1:Np,1) = {NaN*zeros(L,3)}; % Gyro data for each vehicle by row
+magnet(1:Np,1) = {NaN*zeros(L,3)}; % Magnetometer for each vehicle by row
+%time_IMU(1:Np,1) = {NaN*zeros(L,1)}; % Time from the IMU from each vehicle
+current(1:Np,1:2) = {NaN*zeros(L,1)}; % Current data for each vehicle by row and coil by column
+
 %% EVERYTHING ABOVE THIS POINT IS SETUP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -136,17 +176,33 @@ while tnow < tend
     end
     drawnow
     
+    % Get data from the vehicles
+    for i=1:Np
+        acc{Np}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
+        acc{Np}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
+        acc{Np}(tt,3)=imu{Np}.LatestMessage.LinearAcceleration.Z;
+        
+        gyro{Np}(tt,1)=imu{Np}.LatestMessage.AngularVelocity.X;
+        gyro{Np}(tt,2)=imu{Np}.LatestMessage.AngularVelocity.Y;
+        gyro{Np}(tt,3)=imu{Np}.LatestMessage.AngularVelocity.Z;
+        
+        magnet{Np}(tt,1)=magApplied{Np}.LatestMessage.X;
+        magnet{Np}(tt,2)=magApplied{Np}.LatestMessage.Y;
+        magnet{Np}(tt,3)=magApplied{Np}.LatestMessage.Z;
+        
+        %time_IMU{Np}(tt)=imu{Np}.LatestMessage.Header.Stamp.Nsec;
+        
+        current{Np,1}(tt)=currApplied{Np}.LatestMessage.Data;
+        current{Np,2}(tt)=currApplied{Np}.LatestMessage.Data;
+    end
     
     % Save variables
     time(tt)                = tnow;
     x_observer(tt,:)        = xhat;
     x_mocap(tt,:)           = position(:);
-    attitude_mocap(tt,:)    = angle(:); 
+    attitude_mocap(tt,:)    = angle(:);
     attitude_observer(tt,:) = zhat;
     
-    % In this section I need to publish the data in x_mocap and in
-    % attitude_observer
-    msgsAssign(x_observer(tt,:), attitude_observer(tt,:), lin_pos_msg, lin_vel_msg, ang_pos_msg, ang_vel_msg, lin_pos_pub, lin_vel_pub, ang_pos_pub, ang_vel_pub);
     
     tt= tt+1;
     
@@ -161,6 +217,13 @@ x_mocap          = x_mocap(1:inde,:);
 x_observer       = x_observer(1:inde,:); %[X_position, Y_position, Z_position, X_velocity, Y_velocity, Z_velocity]
 attitude_mocap   = attitude_mocap(1:inde,:);
 attitude_observer= attitude_observer(1:inde,:); % [Roll, Pitch, Yaw, RollRate, PitchRate, YawRate]
+for i=1:Np
+    acc{Np} = acc{Np}(1:inde,:);
+    gyro{Np} = gyro{Np}(1:inde,:);
+    magnet{Np} = magnet{Np}(1:inde,:);
+    current{Np} = current{Np}(1:inde,:);
+    %time_IMU{Np} = time_IMU{Np}(1:inde);
+end
 %%  
 
 
