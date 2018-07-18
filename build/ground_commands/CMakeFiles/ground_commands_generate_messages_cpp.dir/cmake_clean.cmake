@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
   "CMakeFiles/ground_commands_generate_messages_cpp"
-  "/home/anthony/EMFF/devel/include/ground_commands/Commands.h"
+  "/home/odroid/EMFF/devel/include/ground_commands/Commands.h"
 )
 
 # Per-language clean rules from dependency scanning.

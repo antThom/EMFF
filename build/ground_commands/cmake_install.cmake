@@ -1,8 +1,8 @@
-# Install script for directory: /home/anthony/EMFF/src/ground_commands
+# Install script for directory: /home/odroid/EMFF/src/ground_commands
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "/home/anthony/EMFF/install")
+  set(CMAKE_INSTALL_PREFIX "/home/odroid/EMFF/install")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -33,53 +33,53 @@ if(NOT DEFINED CMAKE_INSTALL_SO_NO_EXE)
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands/msg" TYPE FILE FILES "/home/anthony/EMFF/src/ground_commands/msg/Commands.msg")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands/msg" TYPE FILE FILES "/home/odroid/EMFF/src/ground_commands/msg/Commands.msg")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands/cmake" TYPE FILE FILES "/home/anthony/EMFF/build/ground_commands/catkin_generated/installspace/ground_commands-msg-paths.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands/cmake" TYPE FILE FILES "/home/odroid/EMFF/build/ground_commands/catkin_generated/installspace/ground_commands-msg-paths.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/anthony/EMFF/devel/include/ground_commands")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/include" TYPE DIRECTORY FILES "/home/odroid/EMFF/devel/include/ground_commands")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/anthony/EMFF/devel/share/roseus/ros/ground_commands")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/roseus/ros" TYPE DIRECTORY FILES "/home/odroid/EMFF/devel/share/roseus/ros/ground_commands")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/anthony/EMFF/devel/share/common-lisp/ros/ground_commands")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/common-lisp/ros" TYPE DIRECTORY FILES "/home/odroid/EMFF/devel/share/common-lisp/ros/ground_commands")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/anthony/EMFF/devel/share/gennodejs/ros/ground_commands")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/gennodejs/ros" TYPE DIRECTORY FILES "/home/odroid/EMFF/devel/share/gennodejs/ros/ground_commands")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  execute_process(COMMAND "/usr/bin/python" -m compileall "/home/anthony/EMFF/devel/lib/python2.7/dist-packages/ground_commands")
+  execute_process(COMMAND "/usr/bin/python" -m compileall "/home/odroid/EMFF/devel/lib/python2.7/dist-packages/ground_commands")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages" TYPE DIRECTORY FILES "/home/anthony/EMFF/devel/lib/python2.7/dist-packages/ground_commands")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/python2.7/dist-packages" TYPE DIRECTORY FILES "/home/odroid/EMFF/devel/lib/python2.7/dist-packages/ground_commands")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/anthony/EMFF/build/ground_commands/catkin_generated/installspace/ground_commands.pc")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/pkgconfig" TYPE FILE FILES "/home/odroid/EMFF/build/ground_commands/catkin_generated/installspace/ground_commands.pc")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands/cmake" TYPE FILE FILES "/home/anthony/EMFF/build/ground_commands/catkin_generated/installspace/ground_commands-msg-extras.cmake")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands/cmake" TYPE FILE FILES "/home/odroid/EMFF/build/ground_commands/catkin_generated/installspace/ground_commands-msg-extras.cmake")
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
   file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands/cmake" TYPE FILE FILES
-    "/home/anthony/EMFF/build/ground_commands/catkin_generated/installspace/ground_commandsConfig.cmake"
-    "/home/anthony/EMFF/build/ground_commands/catkin_generated/installspace/ground_commandsConfig-version.cmake"
+    "/home/odroid/EMFF/build/ground_commands/catkin_generated/installspace/ground_commandsConfig.cmake"
+    "/home/odroid/EMFF/build/ground_commands/catkin_generated/installspace/ground_commandsConfig-version.cmake"
     )
 endif()
 
 if(NOT CMAKE_INSTALL_COMPONENT OR "${CMAKE_INSTALL_COMPONENT}" STREQUAL "Unspecified")
-  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands" TYPE FILE FILES "/home/anthony/EMFF/src/ground_commands/package.xml")
+  file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/share/ground_commands" TYPE FILE FILES "/home/odroid/EMFF/src/ground_commands/package.xml")
 endif()
 

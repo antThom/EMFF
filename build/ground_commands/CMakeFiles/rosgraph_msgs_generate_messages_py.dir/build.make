@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/anthony/EMFF/src
+CMAKE_SOURCE_DIR = /home/odroid/EMFF/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/anthony/EMFF/build
+CMAKE_BINARY_DIR = /home/odroid/EMFF/build
 
 # Utility rule file for rosgraph_msgs_generate_messages_py.
 
@@ -63,10 +63,10 @@ ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build: rosgrap
 .PHONY : ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/build
 
 ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/clean:
-	cd /home/anthony/EMFF/build/ground_commands && $(CMAKE_COMMAND) -P CMakeFiles/rosgraph_msgs_generate_messages_py.dir/cmake_clean.cmake
+	cd /home/odroid/EMFF/build/ground_commands && $(CMAKE_COMMAND) -P CMakeFiles/rosgraph_msgs_generate_messages_py.dir/cmake_clean.cmake
 .PHONY : ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/clean
 
 ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/depend:
-	cd /home/anthony/EMFF/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/anthony/EMFF/src /home/anthony/EMFF/src/ground_commands /home/anthony/EMFF/build /home/anthony/EMFF/build/ground_commands /home/anthony/EMFF/build/ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/odroid/EMFF/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/odroid/EMFF/src /home/odroid/EMFF/src/ground_commands /home/odroid/EMFF/build /home/odroid/EMFF/build/ground_commands /home/odroid/EMFF/build/ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : ground_commands/CMakeFiles/rosgraph_msgs_generate_messages_py.dir/depend
 

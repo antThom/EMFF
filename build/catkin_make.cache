@@ -1,2 +1,2 @@
 ground_commands
--DCATKIN_DEVEL_PREFIX=/home/anthony/EMFF/devel -DCMAKE_INSTALL_PREFIX=/home/anthony/EMFF/install -G Unix Makefiles
+-DCATKIN_DEVEL_PREFIX=/home/odroid/EMFF/devel -DCMAKE_INSTALL_PREFIX=/home/odroid/EMFF/install -G Unix Makefiles

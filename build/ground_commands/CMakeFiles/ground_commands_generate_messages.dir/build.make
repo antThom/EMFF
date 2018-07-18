@@ -43,10 +43,10 @@ RM = /usr/bin/cmake -E remove -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/anthony/EMFF/src
+CMAKE_SOURCE_DIR = /home/odroid/EMFF/src
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/anthony/EMFF/build
+CMAKE_BINARY_DIR = /home/odroid/EMFF/build
 
 # Utility rule file for ground_commands_generate_messages.
 
@@ -63,10 +63,10 @@ ground_commands/CMakeFiles/ground_commands_generate_messages.dir/build: ground_c
 .PHONY : ground_commands/CMakeFiles/ground_commands_generate_messages.dir/build
 
 ground_commands/CMakeFiles/ground_commands_generate_messages.dir/clean:
-	cd /home/anthony/EMFF/build/ground_commands && $(CMAKE_COMMAND) -P CMakeFiles/ground_commands_generate_messages.dir/cmake_clean.cmake
+	cd /home/odroid/EMFF/build/ground_commands && $(CMAKE_COMMAND) -P CMakeFiles/ground_commands_generate_messages.dir/cmake_clean.cmake
 .PHONY : ground_commands/CMakeFiles/ground_commands_generate_messages.dir/clean
 
 ground_commands/CMakeFiles/ground_commands_generate_messages.dir/depend:
-	cd /home/anthony/EMFF/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/anthony/EMFF/src /home/anthony/EMFF/src/ground_commands /home/anthony/EMFF/build /home/anthony/EMFF/build/ground_commands /home/anthony/EMFF/build/ground_commands/CMakeFiles/ground_commands_generate_messages.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/odroid/EMFF/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/odroid/EMFF/src /home/odroid/EMFF/src/ground_commands /home/odroid/EMFF/build /home/odroid/EMFF/build/ground_commands /home/odroid/EMFF/build/ground_commands/CMakeFiles/ground_commands_generate_messages.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : ground_commands/CMakeFiles/ground_commands_generate_messages.dir/depend
 
