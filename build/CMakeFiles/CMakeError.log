@@ -1,24 +1,25 @@
 Determining if the pthread_create exist failed with the following output:
-Change Dir: /home/anthony/EMFF/build/CMakeFiles/CMakeTmp
+Change Dir: /home/odroid/EMFF/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_2c023/fast"
-/usr/bin/make -f CMakeFiles/cmTC_2c023.dir/build.make CMakeFiles/cmTC_2c023.dir/build
-make[1]: Entering directory '/home/anthony/EMFF/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_2c023.dir/CheckSymbolExists.c.o
-/usr/bin/cc     -o CMakeFiles/cmTC_2c023.dir/CheckSymbolExists.c.o   -c /home/anthony/EMFF/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
-Linking C executable cmTC_2c023
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2c023.dir/link.txt --verbose=1
-/usr/bin/cc       CMakeFiles/cmTC_2c023.dir/CheckSymbolExists.c.o  -o cmTC_2c023 -rdynamic 
-CMakeFiles/cmTC_2c023.dir/CheckSymbolExists.c.o: In function `main':
-CheckSymbolExists.c:(.text+0x16): undefined reference to `pthread_create'
+Run Build Command:"/usr/bin/make" "cmTC_b7ebe/fast"
+/usr/bin/make -f CMakeFiles/cmTC_b7ebe.dir/build.make CMakeFiles/cmTC_b7ebe.dir/build
+make[1]: Entering directory '/home/odroid/EMFF/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_b7ebe.dir/CheckSymbolExists.c.o
+/usr/bin/cc     -o CMakeFiles/cmTC_b7ebe.dir/CheckSymbolExists.c.o   -c /home/odroid/EMFF/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c
+Linking C executable cmTC_b7ebe
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b7ebe.dir/link.txt --verbose=1
+/usr/bin/cc       CMakeFiles/cmTC_b7ebe.dir/CheckSymbolExists.c.o  -o cmTC_b7ebe -rdynamic 
+CMakeFiles/cmTC_b7ebe.dir/CheckSymbolExists.c.o: In function `main':
+CheckSymbolExists.c:(.text+0xe): undefined reference to `pthread_create'
+CheckSymbolExists.c:(.text+0x12): undefined reference to `pthread_create'
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_2c023.dir/build.make:97: recipe for target 'cmTC_2c023' failed
-make[1]: *** [cmTC_2c023] Error 1
-make[1]: Leaving directory '/home/anthony/EMFF/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_2c023/fast' failed
-make: *** [cmTC_2c023/fast] Error 2
+CMakeFiles/cmTC_b7ebe.dir/build.make:97: recipe for target 'cmTC_b7ebe' failed
+make[1]: *** [cmTC_b7ebe] Error 1
+make[1]: Leaving directory '/home/odroid/EMFF/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_b7ebe/fast' failed
+make: *** [cmTC_b7ebe/fast] Error 2
 
-File /home/anthony/EMFF/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
+File /home/odroid/EMFF/build/CMakeFiles/CMakeTmp/CheckSymbolExists.c:
 /* */
 #include <pthread.h>
 
@@ -34,22 +35,22 @@ int main(int argc, char** argv)
 }
 
 Determining if the function pthread_create exists in the pthreads failed with the following output:
-Change Dir: /home/anthony/EMFF/build/CMakeFiles/CMakeTmp
+Change Dir: /home/odroid/EMFF/build/CMakeFiles/CMakeTmp
 
-Run Build Command:"/usr/bin/make" "cmTC_69bf9/fast"
-/usr/bin/make -f CMakeFiles/cmTC_69bf9.dir/build.make CMakeFiles/cmTC_69bf9.dir/build
-make[1]: Entering directory '/home/anthony/EMFF/build/CMakeFiles/CMakeTmp'
-Building C object CMakeFiles/cmTC_69bf9.dir/CheckFunctionExists.c.o
-/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_69bf9.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
-Linking C executable cmTC_69bf9
-/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_69bf9.dir/link.txt --verbose=1
-/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_69bf9.dir/CheckFunctionExists.c.o  -o cmTC_69bf9 -rdynamic -lpthreads 
+Run Build Command:"/usr/bin/make" "cmTC_d8143/fast"
+/usr/bin/make -f CMakeFiles/cmTC_d8143.dir/build.make CMakeFiles/cmTC_d8143.dir/build
+make[1]: Entering directory '/home/odroid/EMFF/build/CMakeFiles/CMakeTmp'
+Building C object CMakeFiles/cmTC_d8143.dir/CheckFunctionExists.c.o
+/usr/bin/cc    -DCHECK_FUNCTION_EXISTS=pthread_create   -o CMakeFiles/cmTC_d8143.dir/CheckFunctionExists.c.o   -c /usr/share/cmake-3.5/Modules/CheckFunctionExists.c
+Linking C executable cmTC_d8143
+/usr/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d8143.dir/link.txt --verbose=1
+/usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create    CMakeFiles/cmTC_d8143.dir/CheckFunctionExists.c.o  -o cmTC_d8143 -rdynamic -lpthreads 
 /usr/bin/ld: cannot find -lpthreads
 collect2: error: ld returned 1 exit status
-CMakeFiles/cmTC_69bf9.dir/build.make:97: recipe for target 'cmTC_69bf9' failed
-make[1]: *** [cmTC_69bf9] Error 1
-make[1]: Leaving directory '/home/anthony/EMFF/build/CMakeFiles/CMakeTmp'
-Makefile:126: recipe for target 'cmTC_69bf9/fast' failed
-make: *** [cmTC_69bf9/fast] Error 2
+CMakeFiles/cmTC_d8143.dir/build.make:97: recipe for target 'cmTC_d8143' failed
+make[1]: *** [cmTC_d8143] Error 1
+make[1]: Leaving directory '/home/odroid/EMFF/build/CMakeFiles/CMakeTmp'
+Makefile:126: recipe for target 'cmTC_d8143/fast' failed
+make: *** [cmTC_d8143/fast] Error 2
 
 

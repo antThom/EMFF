@@ -1,8 +1,0 @@
-prefix=/home/anthony/EMFF/build/devel
-
-Name: ground_commands
-Description: Description of ground_commands
-Version: 0.1.0
-Cflags: 
-Libs: -L/home/anthony/EMFF/build/devel/lib 
-Requires: 
