@@ -10,7 +10,7 @@ clear all; close all; clc;
 
 %% Setup Ros Connections
 rosshutdown; %Shutdown any Ros connection before initializing a new one
-setenv('ROS_MASTER_URI','http://192.168.1.29:11311'); % set the ros master to a specific URI
+setenv('ROS_MASTER_URI','http://192.168.1.32:11311'); % set the ros master to a specific URI
 setenv('ROS_IP','192.168.1.22'); % set the ros ip address for this computer
 rosinit %Initialize a new rosnode
 % rosinit('192.168.1.24','NodeHost','192.168.1.22') %Initialize a new rosnode
@@ -79,7 +79,7 @@ client.Initialize('127.0.0.1','127.0.0.1'); % for Local Loopback
 addpath('C:\Users\CDCL\Documents\newMotionCaptureCode\AnthonyREU2018\Quad_experiments\swarming_algorithm\code\');
 addpath('C:\Users\CDCL\Documents\newMotionCaptureCode\AnthonyREU2018\Quad_experiments\mocap_toolbox\');
 
-fig=  figure();  
+fig=  figure(1);  
 set(fig,'deletefcn','client.Uninitialize();  clear(''client'');','Position',[2812 472 560 420]);
 
 %% Matrices for Luenburger observer
@@ -110,7 +110,8 @@ gyro(1:Np,1) = {NaN*zeros(L,3)}; % Gyro data for each vehicle by row
 magnet(1:Np,1) = {NaN*zeros(L,3)}; % Magnetometer for each vehicle by row
 %time_IMU(1:Np,1) = {NaN*zeros(L,1)}; % Time from the IMU from each vehicle
 current(1:Np,1:2) = {NaN*zeros(L,1)}; % Current data for each vehicle by row and coil by column
-
+loops = 25; % The number of loops of each coil
+area=(pi/4)*0.3236; % Area of each coil
 %% EVERYTHING ABOVE THIS POINT IS SETUP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -176,7 +177,7 @@ while tnow < tend
     end
     drawnow
     
-    % Get data from the vehicles
+    %% Get data from the vehicles
     for i=1:Np
         acc{Np}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
         acc{Np}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
@@ -196,7 +197,39 @@ while tnow < tend
         current{Np,2}(tt)=currApplied{Np}.LatestMessage.Data;
     end
     
-    % Save variables
+    %% SEND SATELLITE COMMANDS
+    
+    % NOTE: You should only be sending commands to control the magnetic field.
+    
+    % NOTE: Dr. Paley's controller will output a magnetic dipole moment in polar
+    % coordinates, but the satellites reads the magnetometer in cartesian
+    % coordinates, so we will have to convert his polar command to a
+    % cartesian command. 
+    
+    % NOTE: We will also have to convert hos magnetic command into a
+    % current command to send a current through the coils.
+    
+    % OPEN LOOP
+    u=[10,pi/4]; %this is the polar input
+    
+    magCmd{1,2}.X = (u(1)*cos(u(2)))/(area*loops); %Coil #1
+    magCmd{1,2}.Y = (u(1)*sin(u(2)))/(area*loops); %Coil #2
+    magCmd{1,2}.Z = 0;
+    
+    % Current Saturation
+    if magCmd{1,2}.X > 20
+       magCmd{1,2}.X = 20;  
+    end
+    
+    if magCmd{1,2}.Y >20
+       magCmd{1,2}.Y = 20; 
+    end
+    
+    
+    
+    
+
+    %% Save variables
     time(tt)                = tnow;
     x_observer(tt,:)        = xhat;
     x_mocap(tt,:)           = position(:);
@@ -224,7 +257,20 @@ for i=1:Np
     current{Np} = current{Np}(1:inde,:);
     %time_IMU{Np} = time_IMU{Np}(1:inde);
 end
-%%  
+
+%% PLOTS
+
+figure(3)
+plot(time,attitude_observer(:,6)*(180/pi)); grid on; hold on; legend('YawRate');
+xlabel('Time (sec)'); ylabel('YawRate (deg/s)'); title('YawRate of Satellite v. time')
+
+figure(4)
+plot(time,attitude_observer(:,5)); grid on; hold on; legend('PitchRate');
+xlabel('Time (sec)'); ylabel('PicthRate (rad/s)'); title('PitchRate of Satellite v. time')
+
+figure(5)
+plot(time,attitude_observer(:,4)); grid on; hold on; legend('RollRate');
+xlabel('Time (sec)'); ylabel('RollRate (rad/s)'); title('RollRate of Satellite v. time')
 
 
 

@@ -10,7 +10,7 @@ clear all; close all; clc;
 
 %% Setup Ros Connections
 rosshutdown; %Shutdown any Ros connection before initializing a new one
-setenv('ROS_MASTER_URI','http://192.168.1.29:11311'); % set the ros master to a specific URI
+setenv('ROS_MASTER_URI','http://192.168.1.32:11311'); % set the ros master to a specific URI
 setenv('ROS_IP','192.168.1.22'); % set the ros ip address for this computer
 rosinit %Initialize a new rosnode
 % rosinit('192.168.1.24','NodeHost','192.168.1.22') %Initialize a new rosnode
@@ -52,13 +52,13 @@ imu=cell(Np,1); % This is for vehicle IMU data.
 % Initialize all the Subscribers
 for i=1:Np
    magApplied{i,1}=rossubscriber('/MAGNET_APPLIED','geometry_msgs/Vector3');
-   receive(magApplied{i,1},10); % Recieve a msg on this topic to ensure it is connected to the network (WAITS FOR 10 SECONDS TO RECIEVE)
+   %receive(magApplied{i,1},10); % Recieve a msg on this topic to ensure it is connected to the network (WAITS FOR 10 SECONDS TO RECIEVE)
    currApplied{i,1}=rossubscriber('/CURRENT_APPLIED_1','std_msgs/Float32');
    currApplied{i,2}=rossubscriber('/CURRENT_APPLIED_2','std_msgs/Float32');
-   receive(currApplied{i,1},10);
-   receive(currApplied{i,2},10);
+   %receive(currApplied{i,1},10);
+   %receive(currApplied{i,2},10);
    imu{i,1}=rossubscriber('/IMU','sensor_msgs/Imu');
-   receive(imu{i,1},10); 
+   %receive(imu{i,1},10); 
 end
 %%  Initialize: Motion Capture Interface
 % Add NatNet library and java jar files
@@ -108,8 +108,10 @@ ind_var= ind_var(:);
 acc(1:Np,1) = {NaN*zeros(L,3)}; % Accelerometer data for each vehicle by row
 gyro(1:Np,1) = {NaN*zeros(L,3)}; % Gyro data for each vehicle by row
 magnet(1:Np,1) = {NaN*zeros(L,3)}; % Magnetometer for each vehicle by row
-current(1:Np,1:2) = {NaN*zeros(L,3)}; % Current data for each vehicle by row and coil by column
-
+%time_IMU(1:Np,1) = {NaN*zeros(L,1)}; % Time from the IMU from each vehicle
+current(1:Np,1:2) = {NaN*zeros(L,1)}; % Current data for each vehicle by row and coil by column
+loops = 25; % The number of loops of each coil
+area=(pi/4)*0.3236; % Area of each coil
 %% EVERYTHING ABOVE THIS POINT IS SETUP
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -175,20 +177,51 @@ while tnow < tend
     end
     drawnow
     
-    % Get data from the vehicles
-    for i=1:Np
-        acc{Np}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
-        acc{Np}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
-        acc{Np}(tt,3)=imu{Np}.LatestMessage.LinearAcceleration.Z;
-        
-        gyro{Np}(tt,1)=imu{Np}.LatestMessage.AngularVelocity.X;
-        gyro{Np}(tt,2)=imu{Np}.LatestMessage.AngularVelocity.Y;
-        gyro{Np}(tt,3)=imu{Np}.LatestMessage.AngularVelocity.Z;
-        
-        magnet{Np}(tt,1)=imu{Np}.
-    end
+%     %% Get data from the vehicles
+%     for i=1:Np
+%         acc{Np}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
+%         acc{Np}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
+%         acc{Np}(tt,3)=imu{Np}.LatestMessage.LinearAcceleration.Z;
+%         
+%         gyro{Np}(tt,1)=imu{Np}.LatestMessage.AngularVelocity.X;
+%         gyro{Np}(tt,2)=imu{Np}.LatestMessage.AngularVelocity.Y;
+%         gyro{Np}(tt,3)=imu{Np}.LatestMessage.AngularVelocity.Z;
+%         
+%         magnet{Np}(tt,1)=magApplied{Np}.LatestMessage.X;
+%         magnet{Np}(tt,2)=magApplied{Np}.LatestMessage.Y;
+%         magnet{Np}(tt,3)=magApplied{Np}.LatestMessage.Z;
+%         
+%         %time_IMU{Np}(tt)=imu{Np}.LatestMessage.Header.Stamp.Nsec;
+%         
+%         current{Np,1}(tt)=currApplied{Np}.LatestMessage.Data;
+%         current{Np,2}(tt)=currApplied{Np}.LatestMessage.Data;
+%     end
+%     
+    %% SEND SATELLITE COMMANDS
     
-    % Save variables
+    % NOTE: You should only be sending commands to control the magnetic field.
+    
+    % NOTE: Dr. Paley's controller will output a magnetic dipole moment in polar
+    % coordinates, but the satellites reads the magnetometer in cartesian
+    % coordinates, so we will have to convert his polar command to a
+    % cartesian command. 
+    
+    % NOTE: We will also have to convert hos magnetic command into a
+    % current command to send a current through the coils.
+    
+    % OPEN LOOP
+    u=[10,pi/4]; %this is the polar input
+    
+    magCmd{1,2}.X = (u(1)*cos(u(2)))/(area*loops); %Coil #1
+    magCmd{1,2}.Y = (u(1)*sin(u(2)))/(area*loops); %Coil #2
+    magCmd{1,2}.Z = 0;
+    
+    
+    
+    
+    
+
+    %% Save variables
     time(tt)                = tnow;
     x_observer(tt,:)        = xhat;
     x_mocap(tt,:)           = position(:);
@@ -209,7 +242,17 @@ x_mocap          = x_mocap(1:inde,:);
 x_observer       = x_observer(1:inde,:); %[X_position, Y_position, Z_position, X_velocity, Y_velocity, Z_velocity]
 attitude_mocap   = attitude_mocap(1:inde,:);
 attitude_observer= attitude_observer(1:inde,:); % [Roll, Pitch, Yaw, RollRate, PitchRate, YawRate]
-%%  
+for i=1:Np
+    acc{Np} = acc{Np}(1:inde,:);
+    gyro{Np} = gyro{Np}(1:inde,:);
+    magnet{Np} = magnet{Np}(1:inde,:);
+    current{Np} = current{Np}(1:inde,:);
+    %time_IMU{Np} = time_IMU{Np}(1:inde);
+end
+
+%% PLOTS
+
+figure(
 
 
 
