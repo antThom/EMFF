@@ -64,8 +64,12 @@
 
  void magnetCallback( const geometry_msgs::Vector3& magnetCommand)
  {
-    /* When we get magnet commands we need to convert that to a PWM dutycyle and calculate the magnetic
-     * dipole moment (mu) and magnetic field (B).To do the conversions and calculation we need to first 
+    /* The magnet commands will come in from MATLAB and will actually be a current through the coils command.
+     * The direction of the field is pre-determined and the incoming commands will correspond to each coil. 
+     * For example, the magnetCommand.X is for coil #1 and magnetCommand.Y is for coil #2.
+     * 
+     *  When we get magnet commands we need to convert that to a PWM dutycyle and calculate the magnetic
+     * dipole moment (mu) and magnetic field (B). To do the conversions and calculations we need to first 
      * state some system parameters.
      *  A = Area of Coil
      *  N = Number of loops in the coil
@@ -75,42 +79,51 @@
      *  ohm = Resistance of the coil
      * 
      * Operation Sequence
-     *  1. Get command, apply saturation, and determine direction
+     *  1. Get command
      *  2. Convert command into a dutycycle
      *  3. Calculate mu and B
      *  4. Send dutycycle and direction to the H-Bridge controller.
      */
 
-     float Imax = 20;   //amps  
-     float maxMag = N*Imax*A;
-     
-     // Saturation {mag_Z is ignored for all 2D functions}
-     float mag_X=(saturation(magnetCommand.x, maxMag));
-     float mag_Y=(saturation(magnetCommand.y, maxMag));
-     // float mag_Z=round(saturation(magnetCommand.z));
+     // Convert the currents into DutyCycles (Resistance increases as the coils heat up so this is not the best approach)
+     float DC_x = (magnetCommand.X * ohm) / Vbat; //Domain = [0,1]
+     float DC_y = (magnetCommand.Y * ohm) / Vbat; //Domain = [0,1]
 
-     // Assign the direction of the current
-     if (mag_X < 0)
-        digitalWrite(coil_1_dir,LOW); 
-     else
-        digitalWrite(coil_1_dir,HIGH);
-
-     if (mag_Y < 0)
-        digitalWrite(coil_2_dir,LOW); 
-     else
-        digitalWrite(coil_2_dir,HIGH);
-
-     //Convert the command into a dutycyle
-     DC_x = (mag_X*ohm)/(Vbat*A*N); //Domain = [0,1]
-     DC_y = (mag_Y*ohm)/(Vbat*A*N); //Domain = [0,1]
-
+     // Map these into a pwm signal [0,255]
      DC_x = map(DC_x,0,1,0,255); //new Domain = [0,255] for pwm
-     DC_y = map(DC_y,0,1,0,255);
+     DC_y = map(DC_y,0,1,0,255)
+
+
+/* THIS PORTION WILL NOT WORK MUST FIX
+ *  
+     //Determine DIR Pin Values and apply
+     if (magnetCommand.X < 0)
+        digitalWrite(coil_11_dir,LOW); 
+        digitalWrite(coil_12_dir,HIGH);
+        analogWrite(coil_11_pwm,0); 
+        analogWrite(coil_12_pwm,0); 
+     else if (magnetCommand.X==0)
+        digitalWrite(coil_11_dir, HIGH);
+        digitalWrite(coil_12_dir, LOW);
+        analogWrite(coil_11_pwm,255); 
+        analogWrite(coil_12_pwm,255);
+     else
+        digitalWrite(coil_11_dir,HIGH);
+        digitalWrite(coil_12_dir,LOW); 
+
+     if (magnetCommand.Y < 0)
+        digitalWrite(coil_21_dir,LOW); 
+        digitalWrite(coil_22_dir,HIGH); 
+     else
+        digitalWrite(coil_21_dir,HIGH);
+        digitalWrite(coil_22_dir,LOW); 
 
      //Apply the DutyCyle to the H-Bridge Controller
-     analogWrite(coil_1_pwm,DC_x);
-     analogWrite(coil_2_pwm,DC_y);
-     
+     analogWrite(coil_11_pwm,DC_x); // coil_11_pwm should be the same as coil_12_pwm
+     analogWrite(coil_12_pwm,DC_x);
+     analogWrite(coil_21_pwm,DC_y);
+     analogWrite(coil_22_pwm,DC_y);
+     */
  }
 
 ///////////////////////{ SUBSCRIBE }////////////////////////////////////////
@@ -262,17 +275,6 @@ float currentSensor(float CS_Vout)
   return c;
 }
 
-float saturation(float mag, float maxMag) 
-{
-  //Apply a saturation to the desired magnet direction
-  if (mag>maxMag){
-    mag=maxMag;
-  }
-  else if (mag<-maxMag){
-    mag=-maxMag;
-  }
-  return mag;
-}
 
 float integrator(float yawRate)
 {

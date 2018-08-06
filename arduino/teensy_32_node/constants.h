@@ -24,10 +24,14 @@
     const int imu_LED = 12;        //Digital pin 12
     const int mag_LED = 11;        //Digital pin 11
     const int LED = 10;            //Good status LED Digital pin 10
-    const int coil_1_dir = 7;      //Direction of coil_1
-    const int coil_2_dir = 8;      //Direction of coil_2
-    const int coil_1_pwm = 23;     //DutyCycle of coil_1
-    const int coil_2_pwm = 22;     //DutyCycle of coil_2
+    const int coil_11_dir = 6;      //Direction of coil_1
+    const int coil_12_dir = 7;      //Direction of coil_2
+    const int coil_21_dir = 8;      //Direction of coil_1
+    const int coil_22_dir = 9;      //Direction of coil_2
+    const int coil_11_pwm = 23;     //DutyCycle of coil_1
+    const int coil_12_pwm = 22;     //DutyCycle of coil_2
+    const int coil_21_pwm = 21;     //DutyCycle of coil_1
+    const int coil_22_pwm = 20;     //DutyCycle of coil_2
 
     //System Variables
     float CS_Vout;
