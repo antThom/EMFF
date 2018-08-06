@@ -17,7 +17,7 @@ rosinit %Initialize a new rosnode
 pause(2);   %Give matlab some time to setup the node
 
 %% User defined Parameters
-prompt='Number of vehicles to track? ';
+prompt='Number of satellites to track? ';
 Np=input(prompt); % # of vehicles that we are tracking at one time
 
 % Vehicle ID specified in Motive
@@ -79,7 +79,7 @@ client.Initialize('127.0.0.1','127.0.0.1'); % for Local Loopback
 addpath('C:\Users\CDCL\Documents\newMotionCaptureCode\AnthonyREU2018\Quad_experiments\swarming_algorithm\code\');
 addpath('C:\Users\CDCL\Documents\newMotionCaptureCode\AnthonyREU2018\Quad_experiments\mocap_toolbox\');
 
-fig=  figure();  
+fig=  figure(1);  
 set(fig,'deletefcn','client.Uninitialize();  clear(''client'');','Position',[2812 472 560 420]);
 
 %% Matrices for Luenburger observer
@@ -177,7 +177,7 @@ while tnow < tend
     end
     drawnow
     
-%     %% Get data from the vehicles
+     %% Get data from the vehicles
 %     for i=1:Np
 %         acc{Np}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
 %         acc{Np}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
@@ -209,14 +209,25 @@ while tnow < tend
     % NOTE: We will also have to convert hos magnetic command into a
     % current command to send a current through the coils.
     
-    % OPEN LOOP
+    %%%%% OPEN LOOP
     u=[10,pi/4]; %this is the polar input
     
-    magCmd{1,2}.X = (u(1)*cos(u(2)))/(area*loops); %Coil #1
-    magCmd{1,2}.Y = (u(1)*sin(u(2)))/(area*loops); %Coil #2
-    magCmd{1,2}.Z = 0;
-    
-    
+    % Convert the polar dipole commands into current commands for all
+    % satellites
+    for sat=1:Np
+        magCmd{sat,2}.X = (u(1)*cos(u(2)))/(area*loops); %Coil #1
+        magCmd{sat,2}.Y = (u(1)*sin(u(2)))/(area*loops); %Coil #2
+        magCmd{sat,2}.Z = 0;
+        
+        % Current Saturation
+        if magCmd{sat,2}.X > 20
+            magCmd{sat,2}.X = 20;
+        end
+        
+        if magCmd{sat,2}.Y >20
+            magCmd{sat,2}.Y = 20;
+        end
+    end
     
     
     
@@ -243,17 +254,38 @@ x_observer       = x_observer(1:inde,:); %[X_position, Y_position, Z_position, X
 attitude_mocap   = attitude_mocap(1:inde,:);
 attitude_observer= attitude_observer(1:inde,:); % [Roll, Pitch, Yaw, RollRate, PitchRate, YawRate]
 for i=1:Np
-    acc{Np} = acc{Np}(1:inde,:);
-    gyro{Np} = gyro{Np}(1:inde,:);
-    magnet{Np} = magnet{Np}(1:inde,:);
-    current{Np} = current{Np}(1:inde,:);
+    acc{i} = acc{i}(1:inde,:);
+    gyro{i} = gyro{i}(1:inde,:);
+    magnet{i} = magnet{i}(1:inde,:);
+    current{i} = current{i}(1:inde,:);
     %time_IMU{Np} = time_IMU{Np}(1:inde);
 end
 
 %% PLOTS
 
-figure(
+figure(3)
+plot(time,attitude_observer(:,6)*(180/pi)); grid on; hold on; legend('YawRate');
+xlabel('Time (sec)'); ylabel('YawRate (deg/s)'); title('YawRate of Satellite1 v. time')
 
+figure(4)
+plot(time,attitude_observer(:,5)); grid on; hold on; legend('PitchRate');
+xlabel('Time (sec)'); ylabel('PicthRate (rad/s)'); title('PitchRate of Satellite1 v. time')
+
+figure(5)
+plot(time,attitude_observer(:,4)); grid on; hold on; legend('RollRate');
+xlabel('Time (sec)'); ylabel('RollRate (rad/s)'); title('RollRate of Satellite1 v. time')
+
+figure(3)
+plot(time,attitude_observer(:,12)*(180/pi)); grid on; hold on; legend('YawRate');
+xlabel('Time (sec)'); ylabel('YawRate (deg/s)'); title('YawRate of Satellite2 v. time')
+
+figure(4)
+plot(time,attitude_observer(:,11)); grid on; hold on; legend('PitchRate');
+xlabel('Time (sec)'); ylabel('PicthRate (rad/s)'); title('PitchRate of Satellite2 v. time')
+
+figure(5)
+plot(time,attitude_observer(:,10)); grid on; hold on; legend('RollRate');
+xlabel('Time (sec)'); ylabel('RollRate (rad/s)'); title('RollRate of Satellite2 v. time')
 
 
 
