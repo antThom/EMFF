@@ -207,6 +207,7 @@ void setup() {
   digitalWrite(13, LOW); //Turn off initialization LED
   time_0 = millis(); //Initial Time
   coilTime_0 = millis();//Initial Time for the coils
+  Serial.begin(9600);
 }
 
 void loop() {
@@ -239,11 +240,7 @@ void loop() {
   IMU.angular_velocity.x = acc_gyr.g.x / gyroGain;
   IMU.angular_velocity.y = acc_gyr.g.y / gyroGain;
   IMU.angular_velocity.z = acc_gyr.g.z / gyroGain;
-
-  //Assign values to the orientation
-  float yawRate = acc_gyr.g.z;
-  yaw = integrator(yawRate); //Not being published as of yet
-
+  
   IMU.orientation.x = 0.0; //We're getting data from MOCAP so I ignored these values
   IMU.orientation.y = 0.0;
   IMU.orientation.z = 0.0;
@@ -255,6 +252,12 @@ void loop() {
   current2.data = currentSensor(analogRead(curSens2));
 
 
+  //Serial print the sensor data
+  //Serial.print(IMU.linear_acceleration.x); Serial.print("  "); Serial.print(IMU.linear_acceleration.y); Serial.print("  "); Serial.print(IMU.linear_acceleration.z);
+  //Serial.print(IMU.angular_velocity.x); Serial.print("  "); Serial.print(IMU.angular_velocity.y); Serial.print("  "); Serial.print(IMU.angular_velocity.z); 
+  //Serial.print(magnetApplied.x); Serial.print("  "); Serial.print(magnetApplied.y); Serial.print("  "); Serial.print(magnetApplied.z);
+  //Serial.println(); //Serial.println();
+  
   /*//////////////////////{ SAMPLE CODE, NEEDS TO BE DELETED } //////////////////////////////
     current.data = 1.0;
     magnetApplied.x=1.0; magnetApplied.y=2.0; magnetApplied.z=3.0;
@@ -287,16 +290,9 @@ void loop() {
 float currentSensor(float CS_Vout)
 {
   CS_Vout = map(CS_Vout, 0, 1023, 0, 3.3);
-  float c = (CS_Vout - 0.5 * VCC_Teensy) / (0.185);
-  //float c = 73.3*(CS_Vout/VCC_Teensy)-36.7;
+  //float c = (CS_Vout - 0.5 * VCC_Teensy) / (0.185);
+  float c = 73.3*(CS_Vout/VCC_Teensy)-36.7;
   return c;
-}
-
-
-float integrator(float yawRate)
-{
-  yaw = yaw + yawRate * dt;
-  return yaw;
 }
 
 void coilActivate(float coil_dt)

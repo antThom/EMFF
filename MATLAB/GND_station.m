@@ -52,13 +52,13 @@ imu=cell(Np,1); % This is for vehicle IMU data.
 % Initialize all the Subscribers
 for i=1:Np
    magApplied{i,1}=rossubscriber('/MAGNET_APPLIED','geometry_msgs/Vector3');
-   %receive(magApplied{i,1},10); % Recieve a msg on this topic to ensure it is connected to the network (WAITS FOR 10 SECONDS TO RECIEVE)
+   receive(magApplied{i,1},10); % Recieve a msg on this topic to ensure it is connected to the network (WAITS FOR 10 SECONDS TO RECIEVE)
    currApplied{i,1}=rossubscriber('/CURRENT_APPLIED_1','std_msgs/Float32');
    currApplied{i,2}=rossubscriber('/CURRENT_APPLIED_2','std_msgs/Float32');
-   %receive(currApplied{i,1},10);
-   %receive(currApplied{i,2},10);
+   receive(currApplied{i,1},10);
+   receive(currApplied{i,2},10);
    imu{i,1}=rossubscriber('/IMU','sensor_msgs/Imu');
-   %receive(imu{i,1},10); 
+   receive(imu{i,1},10); 
 end
 %%  Initialize: Motion Capture Interface
 % Add NatNet library and java jar files
@@ -178,25 +178,25 @@ while tnow < tend
     drawnow
     
      %% Get data from the vehicles
-%     for i=1:Np
-%         acc{Np}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
-%         acc{Np}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
-%         acc{Np}(tt,3)=imu{Np}.LatestMessage.LinearAcceleration.Z;
-%         
-%         gyro{Np}(tt,1)=imu{Np}.LatestMessage.AngularVelocity.X;
-%         gyro{Np}(tt,2)=imu{Np}.LatestMessage.AngularVelocity.Y;
-%         gyro{Np}(tt,3)=imu{Np}.LatestMessage.AngularVelocity.Z;
-%         
-%         magnet{Np}(tt,1)=magApplied{Np}.LatestMessage.X;
-%         magnet{Np}(tt,2)=magApplied{Np}.LatestMessage.Y;
-%         magnet{Np}(tt,3)=magApplied{Np}.LatestMessage.Z;
-%         
-%         %time_IMU{Np}(tt)=imu{Np}.LatestMessage.Header.Stamp.Nsec;
-%         
-%         current{Np,1}(tt)=currApplied{Np}.LatestMessage.Data;
-%         current{Np,2}(tt)=currApplied{Np}.LatestMessage.Data;
-%     end
-%     
+    for i=1:Np
+        acc{i}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
+        acc{i}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
+        acc{i}(tt,3)=imu{i}.LatestMessage.LinearAcceleration.Z;
+        
+        gyro{i}(tt,1)=imu{i}.LatestMessage.AngularVelocity.X;
+        gyro{i}(tt,2)=imu{i}.LatestMessage.AngularVelocity.Y;
+        gyro{i}(tt,3)=imu{i}.LatestMessage.AngularVelocity.Z;
+        
+        magnet{i}(tt,1)=magApplied{i}.LatestMessage.X;
+        magnet{i}(tt,2)=magApplied{i}.LatestMessage.Y;
+        magnet{i}(tt,3)=magApplied{i}.LatestMessage.Z;
+        
+        %time_IMU{Np}(tt)=imu{Np}.LatestMessage.Header.Stamp.Nsec;
+        
+        current{i,1}(tt)=currApplied{i}.LatestMessage.Data;
+        current{i,2}(tt)=currApplied{i}.LatestMessage.Data;
+    end
+    
     %% SEND SATELLITE COMMANDS
     
     % NOTE: You should only be sending commands to control the magnetic field.
