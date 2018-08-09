@@ -119,7 +119,7 @@ area=(pi/4)*0.3236; % Area of each coil
 
 tt= 1;
 tnow= 0;
-tend= 15; % (s) This is the experiment duration variable
+tend= 5; % (s) This is the experiment duration variable
 % it would be nice to not have to specify a time for the experiment to last
 % but rather to be able to tell the experiment whento stop by pressing a
 % key
@@ -227,6 +227,9 @@ while tnow < tend
         if magCmd{sat,2}.Y >20
             magCmd{sat,2}.Y = 20;
         end
+        
+        % Send the command
+        send(magCmd{sat,1},magCmd{sat,2}); % Since it is in the for loop it will send this message to every satellite we can communicate with
     end
     
     
@@ -257,35 +260,25 @@ for i=1:Np
     acc{i} = acc{i}(1:inde,:);
     gyro{i} = gyro{i}(1:inde,:);
     magnet{i} = magnet{i}(1:inde,:);
-    current{i} = current{i}(1:inde,:);
+    current{i,1} = current{i}(1:inde,:);
+    current{i,2} = current{i}(1:inde,:);
     %time_IMU{Np} = time_IMU{Np}(1:inde);
 end
 
 %% PLOTS
+% 
+% figure(3)
+% plot(time,attitude_observer(:,6)*(180/pi)); grid on; hold on; legend('YawRate');
+% xlabel('Time (sec)'); ylabel('YawRate (deg/s)'); title('YawRate of Satellite1 v. time')
+% 
+% figure(4)
+% plot(time,attitude_observer(:,5)); grid on; hold on; legend('PitchRate');
+% xlabel('Time (sec)'); ylabel('PicthRate (rad/s)'); title('PitchRate of Satellite1 v. time')
+% 
+% figure(5)
+% plot(time,attitude_observer(:,4)); grid on; hold on; legend('RollRate');
+% xlabel('Time (sec)'); ylabel('RollRate (rad/s)'); title('RollRate of Satellite1 v. time')
 
-figure(3)
-plot(time,attitude_observer(:,6)*(180/pi)); grid on; hold on; legend('YawRate');
-xlabel('Time (sec)'); ylabel('YawRate (deg/s)'); title('YawRate of Satellite1 v. time')
-
-figure(4)
-plot(time,attitude_observer(:,5)); grid on; hold on; legend('PitchRate');
-xlabel('Time (sec)'); ylabel('PicthRate (rad/s)'); title('PitchRate of Satellite1 v. time')
-
-figure(5)
-plot(time,attitude_observer(:,4)); grid on; hold on; legend('RollRate');
-xlabel('Time (sec)'); ylabel('RollRate (rad/s)'); title('RollRate of Satellite1 v. time')
-
-figure(6)
-plot(time,attitude_observer(:,12)*(180/pi)); grid on; hold on; legend('YawRate');
-xlabel('Time (sec)'); ylabel('YawRate (deg/s)'); title('YawRate of Satellite2 v. time')
-
-figure(7)
-plot(time,attitude_observer(:,11)); grid on; hold on; legend('PitchRate');
-xlabel('Time (sec)'); ylabel('PicthRate (rad/s)'); title('PitchRate of Satellite2 v. time')
-
-figure(8)
-plot(time,attitude_observer(:,10)); grid on; hold on; legend('RollRate');
-xlabel('Time (sec)'); ylabel('RollRate (rad/s)'); title('RollRate of Satellite2 v. time')
 
 
 

@@ -9,8 +9,8 @@ clear all; close all; clc;
 
 %% RosNetwork Setup
 rosshutdown;
-setenv('ROS_MASTER_URI','http://192.168.1.31:11311');
-setenv('ROS_IP','192.168.1.26');
+setenv('ROS_MASTER_URI','http://192.168.1.32:11311');
+setenv('ROS_IP','192.168.1.22');
 rosinit;
 pause(2);
 
@@ -28,8 +28,11 @@ imu=rossubscriber('/IMU','sensor_msgs/Imu');
 receive(imu,10);
 %% Initialize Variables
 wait=10e-3;
-exTime=5*60;
+exTime=0.1*60;
 s = exTime / wait;
+time = (0:wait:exTime)';
+time(end)=[];
+
 acc = NaN*zeros(s,3); % Accelerometer data for each vehicle by row
 gyro = NaN*zeros(s,3); % Gyro data for each vehicle by row
 magnet = NaN*zeros(s,3); % Magnetometer for each vehicle by row
@@ -64,20 +67,55 @@ send(mag_pub,mag_msg); % Send the command to the teensy
 
 %% Data Collection
 for n=1:s
-    acc(s)=imu.LatestMessage.LinearAcceleration.X;
-    acc(s)=imu.LatestMessage.LinearAcceleration.Y;
-    acc(s)=imu.LatestMessage.LinearAcceleration.Z;
+    acc(n,1)=imu.LatestMessage.LinearAcceleration.X;
+    acc(n,2)=imu.LatestMessage.LinearAcceleration.Y;
+    acc(n,3)=imu.LatestMessage.LinearAcceleration.Z;
     
-    gyro(s)=imu.LatestMessage.AngularVelocity.X;
-    gyro(s)=imu.LatestMessage.AngularVelocity.Y;
-    gyro(s)=imu.LatestMessage.AngularVelocity.Z;
+    gyro(n,1)=imu.LatestMessage.AngularVelocity.X;
+    gyro(n,2)=imu.LatestMessage.AngularVelocity.Y;
+    gyro(n,3)=imu.LatestMessage.AngularVelocity.Z;
     
-    magnet(s)=magApplied.LatestMessage.X;
-    magnet(s)=magApplied.LatestMessage.Y;
-    magnet(s)=magApplied.LatestMessage.Z;
+    magnet(n,1)=magApplied.LatestMessage.X;
+    magnet(n,2)=magApplied.LatestMessage.Y;
+    magnet(n,3)=magApplied.LatestMessage.Z;
     
-    current1(s)=currApplied1.LatestMessage.Data;
-    current2(s)=currApplied2.LatestMessage.Data;
+    current1(n)=currApplied1.LatestMessage.Data;
+    current2(n)=currApplied2.LatestMessage.Data;
     
     pause(wait);
 end
+
+%% Plotting
+figure(1)
+plot(time,acc(:,1)); hold on; grid on; plot(time,acc(:,2)); plot(time,acc(:,3)); 
+xlabel('Time (sec)'); ylabel('Acceleration (m/s^2)'); 
+title('Satellite Linear Acceleration v. Time');
+legend('X','Y','Z')
+
+figure(2)
+plot(time,gyro(:,1)); hold on; grid on; plot(time,gyro(:,2)); plot(time,gyro(:,3)); 
+xlabel('Time (sec)'); ylabel('Angular Velocity (rad/s)'); 
+title('Satellite Angular Velocity v. Time');
+legend('X','Y','Z')
+
+figure(3)
+plot(time,magnet(:,1)); hold on; grid on; plot(time,magnet(:,2)); plot(time,magnet(:,3)); 
+xlabel('Time (sec)'); ylabel('Magnetic Field Strength (Guass)'); 
+title('Satellite Magnetic Field Strength v. Time');
+legend('X','Y','Z')
+
+figure(4)
+plot(time,current1); hold on; grid on; plot(time,current2);
+xlabel('Time (sec)'); ylabel('Current (Amps)'); 
+title('Satellite Coil Current v. Time');
+legend('Coil_1','Coil_2')
+
+figure(5)
+plot(current1,magnet(:,1)); hold on; grid on;
+xlabel('Current (Amps)'); ylabel('Magnetic Field Strength (Guass)'); 
+title('Satellite Magnetic Field Strength v. Satellite Coil Current');
+
+figure(6)
+plot(current2,magnet(:,2)); hold on; grid on;
+xlabel('Current (Amps)'); ylabel('Magnetic Field Strength (Guass)'); 
+title('Satellite Magnetic Field Strength v. Satellite Coil Current');
