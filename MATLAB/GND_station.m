@@ -179,8 +179,8 @@ while tnow < tend
     
      %% Get data from the vehicles
     for i=1:Np
-        acc{i}(tt,1)=imu{Np}.LatestMessage.LinearAcceleration.X;
-        acc{i}(tt,2)=imu{Np}.LatestMessage.LinearAcceleration.Y;
+        acc{i}(tt,1)=imu{i}.LatestMessage.LinearAcceleration.X;
+        acc{i}(tt,2)=imu{i}.LatestMessage.LinearAcceleration.Y;
         acc{i}(tt,3)=imu{i}.LatestMessage.LinearAcceleration.Z;
         
         gyro{i}(tt,1)=imu{i}.LatestMessage.AngularVelocity.X;

@@ -18,7 +18,7 @@
     float R = 0.156775;           //Radius of coil meters
     float A = pi*R*R;             //Area of coil meters^2
     int timeON = 30;            //Amount of time the coils will be on (seconds)
-    float GDC = 0.50;             //Global duty cycle of the coils (coil ON / coil off)
+    float GDC = 0.20;             //Global duty cycle of the coils (coil ON / coil off)
     float timeOFF = timeON/GDC;   //Amount of time the coils will be off (seconds)
     
     //Pin Assignment

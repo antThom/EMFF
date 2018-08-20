@@ -93,8 +93,9 @@ void magnetCallback( const geometry_msgs::Vector3& magnetCommand)
   DC_x = map(DC_x, 0, 1, 0, 255); //new Domain = [0,255] for pwm
   DC_y = map(DC_y, 0, 1, 0, 255);
 
+  digitalWrite(coil_11_dir, HIGH)
   //Determine DIR Pin Values and apply
-
+/*
   //COIL #1
   if (magnetCommand.x < 0)                 //REVERSE
   {
@@ -140,6 +141,7 @@ void magnetCallback( const geometry_msgs::Vector3& magnetCommand)
     analogWrite(coil_21_pwm, 255);
     analogWrite(coil_22_pwm, 0);
   }
+  */
 }
 
 ///////////////////////{ SUBSCRIBE }////////////////////////////////////////
